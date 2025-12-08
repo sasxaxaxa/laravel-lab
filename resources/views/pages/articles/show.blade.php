@@ -19,8 +19,13 @@
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
                 @if($article->image)
-                <img src="{{ $article->image }}" class="card-img-top" alt="{{ $article->title }}" style="max-height: 400px; object-fit: cover;">
-                @endif
+<div class="mb-4 rounded overflow-hidden shadow">
+    <img src="{{ asset($article->image) }}" 
+         class="img-fluid w-100"
+         alt="{{ $article->title }}"
+         style="max-height: 400px; object-fit: cover;">
+</div>
+@endif
                 <div class="card-body">
                     <div class="mb-3">
                         <span class="badge bg-primary">{{ $article->category }}</span>
