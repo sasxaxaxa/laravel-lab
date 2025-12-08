@@ -51,13 +51,12 @@
     <footer class="py-4 mt-auto">
         <div class="container text-center">
             <p class="mb-0 text-muted">
-                <strong>Иванов Иван Иванович</strong> | Группа: <span class="text-primary">ПИ-202</span>
+                <strong>Симаева Александра Вячеславовна</strong> | Группа: <span class="text-primary">241-321</span>
             </p>
             <small class="text-muted">© {{ date('Y') }} Учебный проект</small>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

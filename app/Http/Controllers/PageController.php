@@ -8,12 +8,12 @@ class PageController extends Controller
 {
     public function home()
     {
-        return view('home');
+        return view('/pages/home');
     }
 
     public function about()
     {
-        return view('about');
+        return view('pages/about');
     }
 
     public function contacts()
@@ -57,6 +57,6 @@ class PageController extends Controller
             ],
         ];
 
-        return view('contacts', compact('contacts'));
+        return view('pages/contacts', compact('contacts'));
     }
 }
