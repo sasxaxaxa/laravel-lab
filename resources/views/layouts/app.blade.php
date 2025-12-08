@@ -39,6 +39,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('contacts') }}">Контакты</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('auth.create') }}">
+                            <i class="bi bi-person-plus me-1"></i>Регистрация
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

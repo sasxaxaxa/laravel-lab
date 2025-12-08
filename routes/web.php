@@ -10,3 +10,9 @@ Route::get('/gallery/{id}', [MainController::class, 'gallery'])->name('gallery')
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contacts', [PageController::class, 'contacts'])->name('contacts');
+
+Route::prefix('auth')->group(function () {
+    Route::get('/signin', [AuthController::class, 'create'])->name('auth.create');
+    
+    Route::post('/signin', [AuthController::class, 'registration'])->name('auth.registration');
+});
