@@ -3,6 +3,7 @@
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', [MainController::class, 'index'])->name('home');
 
