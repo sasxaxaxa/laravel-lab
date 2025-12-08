@@ -65,7 +65,6 @@
         @endforeach
     </div>
 
-    <!-- Таблица с информацией -->
     <div class="mt-5">
         <div class="card border-0 shadow">
             <div class="card-header bg-primary text-white">

@@ -14,7 +14,7 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::latest()
-            ->paginate(10); // ← Пагинация 10 на странице
+            ->paginate(10); 
             
         return view('pages.articles.index', compact('articles'));
     }
@@ -38,7 +38,6 @@ class ArticleController extends Controller
             Article::messages()
         );
 
-        // Автогенерация slug если не указан
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
         }

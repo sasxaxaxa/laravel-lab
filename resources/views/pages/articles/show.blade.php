@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="container py-4">
-    <!-- Хлебные крошки -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('home') }}">Главная</a></li>
@@ -14,7 +13,6 @@
         </ol>
     </nav>
 
-    <!-- Статья -->
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
@@ -65,9 +63,7 @@
             </div>
         </div>
 
-        <!-- Сайдбар -->
         <div class="col-lg-4">
-            <!-- Информация о статье -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Информация</h5>
@@ -102,7 +98,6 @@
                 </div>
             </div>
 
-            <!-- Похожие статьи -->
             <div class="card">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">Похожие статьи</h5>

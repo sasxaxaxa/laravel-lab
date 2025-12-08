@@ -15,7 +15,6 @@ class ArticleFactory extends Factory
         $title = $this->faker->sentence(6);
         $categories = ['politics', 'sports', 'technology', 'entertainment', 'business', 'health'];
         
-        // Ваши 5 изображений
         $images = [
             'news1.jpg',
             'news2.jpg',
@@ -30,7 +29,7 @@ class ArticleFactory extends Factory
             'content' => $this->faker->paragraphs(5, true),
             'category' => $this->faker->randomElement($categories),
             'author' => $this->faker->name(),
-            'image' => '/images/articles/' . $this->faker->randomElement($images), // ← Путь к вашим картинкам
+            'image' => '/images/articles/' . $this->faker->randomElement($images),
             'views' => $this->faker->numberBetween(0, 10000),
             'is_published' => $this->faker->boolean(90),
             'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),

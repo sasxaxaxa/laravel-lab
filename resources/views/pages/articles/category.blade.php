@@ -11,12 +11,10 @@
         </div>
     </div>
 
-    <!-- Статьи -->
     <div class="row">
         @foreach($articles as $article)
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100 shadow-sm">
-    <!-- Изображение -->
           <div class="card-img-top position-relative" style="height: 200px; overflow: hidden;">
               @if($article->image)
                   <img src="{{ asset($article->image) }}" 
@@ -24,19 +22,16 @@
                       alt="{{ $article->title }}"
                       style="object-fit: cover;">
                   
-                  <!-- Затемнение для текста -->
                   <div class="position-absolute top-0 start-0 w-100 h-100" 
                       style="background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3));">
                   </div>
                   
-                  <!-- Категория поверх изображения -->
                   <div class="position-absolute bottom-0 start-0 m-3">
                       <span class="badge bg-primary">
                           {{ $article->category }}
                       </span>
                   </div>
               @else
-                  <!-- Заглушка если нет изображения -->
                   <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
                       <div class="text-center text-muted">
                           <i class="bi bi-image display-4"></i>
@@ -46,7 +41,6 @@
               @endif
           </div>
           
-          <!-- Контент статьи -->
           <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ $article->title }}</h5>
               
@@ -76,8 +70,7 @@
         </div>
         @endforeach
     </div>
-    
-    <!-- Пагинация -->
+
     @if($articles->hasPages())
     <div class="row mt-5">
         <div class="col-12">
@@ -158,7 +151,6 @@
                 </ul>
             </nav>
 
-            {{-- Информация о страницах --}}
             <div class="text-center mt-3">
                 <p class="text-muted mb-0">
                     Показано 
@@ -173,7 +165,6 @@
         </div>
     </div>
     @endif
-    <!-- Информация о категории -->
     <div class="row mt-5">
         <div class="col-12">
             <div class="card">

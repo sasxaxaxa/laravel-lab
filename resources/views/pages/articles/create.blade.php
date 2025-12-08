@@ -18,7 +18,6 @@
                         @csrf
 
                         <div class="row">
-                            <!-- Заголовок -->
                             <div class="col-md-8 mb-3">
                                 <label for="title" class="form-label">Заголовок *</label>
                                 <input type="text" 
@@ -32,7 +31,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Категория -->
                             <div class="col-md-4 mb-3">
                                 <label for="category" class="form-label">Категория *</label>
                                 <select class="form-select @error('category') is-invalid @enderror" 
@@ -52,7 +50,6 @@
                             </div>
                         </div>
 
-                        <!-- Slug -->
                         <div class="mb-3">
                             <label for="slug" class="form-label">Slug (URL) *</label>
                             <input type="text" 
@@ -70,7 +67,6 @@
                             </small>
                         </div>
 
-                        <!-- Автор -->
                         <div class="mb-3">
                             <label for="author" class="form-label">Автор *</label>
                             <input type="text" 
@@ -84,7 +80,6 @@
                             @enderror
                         </div>
 
-                        <!-- Изображение -->
                         <div class="mb-3">
                             <label for="image" class="form-label">Изображение</label>
                             <select class="form-select @error('image') is-invalid @enderror" 
@@ -105,7 +100,6 @@
                             </small>
                         </div>
 
-                        <!-- Содержание -->
                         <div class="mb-3">
                             <label for="content" class="form-label">Содержание *</label>
                             <textarea class="form-control @error('content') is-invalid @enderror" 
@@ -118,7 +112,6 @@
                             @enderror
                         </div>
 
-                        <!-- Статус публикации -->
                         <div class="mb-4">
                             <div class="form-check">
                                 <input class="form-check-input" 
@@ -133,7 +126,6 @@
                             </div>
                         </div>
 
-                        <!-- Кнопки -->
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>Назад к списку
@@ -150,7 +142,6 @@
 </div>
 
 <script>
-// Автогенерация slug из заголовка
 document.getElementById('title').addEventListener('input', function() {
     const slugField = document.getElementById('slug');
     if (!slugField.value) {

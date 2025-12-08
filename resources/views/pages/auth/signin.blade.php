@@ -14,11 +14,9 @@
                 </div>
                 
                 <div class="card-body p-4">
-                    <!-- Форма регистрации -->
-                    <form method="POST" action="{{ route('auth.registration') }}" id="registrationForm">
+                    <form method="POST" action="{{ url('/register') }}" id="registrationForm">
                         @csrf
                         
-                        <!-- Поле: Имя -->
                         <div class="mb-4">
                             <label for="name" class="form-label">
                                 <i class="bi bi-person-circle me-1"></i>Имя пользователя
@@ -35,7 +33,6 @@
                             <div class="form-text">Минимум 3 символа</div>
                         </div>
                         
-                        <!-- Поле: Email -->
                         <div class="mb-4">
                             <label for="email" class="form-label">
                                 <i class="bi bi-envelope me-1"></i>Email адрес
@@ -52,7 +49,6 @@
                             <div class="form-text">Мы никогда не передадим вашу почту третьим лицам</div>
                         </div>
                         
-                        <!-- Поле: Пароль -->
                         <div class="mb-4">
                             <label for="password" class="form-label">
                                 <i class="bi bi-lock me-1"></i>Пароль
@@ -68,7 +64,6 @@
                             <div class="form-text">Минимум 6 символов</div>
                         </div>
                         
-                        <!-- Поле: Подтверждение пароля -->
                         <div class="mb-4">
                             <label for="password_confirmation" class="form-label">
                                 <i class="bi bi-lock-fill me-1"></i>Подтверждение пароля
@@ -80,7 +75,6 @@
                                    placeholder="Повторите пароль">
                         </div>
                         
-                        <!-- Кнопки -->
                         <div class="d-grid gap-3">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="bi bi-check-circle me-2"></i>Зарегистрироваться
@@ -91,7 +85,6 @@
                         </div>
                     </form>
                     
-                    <!-- Информация о заполненных данных (будет показываться после отправки) -->
                     <div class="mt-4" id="responseData" style="display: none;">
                         <div class="alert alert-info">
                             <h6 class="alert-heading">
@@ -111,7 +104,6 @@
                 </div>
             </div>
             
-            <!-- Информационная панель -->
             <div class="card border-info mt-4">
                 <div class="card-body">
                     <h6 class="card-title text-info">
@@ -141,7 +133,6 @@
     </div>
 </div>
 
-<!-- JavaScript для отображения JSON ответа -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registrationForm');
@@ -151,13 +142,11 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Показываем загрузку
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Отправка...';
         submitBtn.disabled = true;
         
-        // Отправка формы через fetch для обработки JSON ответа
         fetch(form.action, {
             method: 'POST',
             body: new FormData(form),
@@ -167,14 +156,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            // Форматируем JSON для красивого вывода
             jsonOutput.textContent = JSON.stringify(data, null, 2);
             responseDiv.style.display = 'block';
             
-            // Прокручиваем к результату
             responseDiv.scrollIntoView({ behavior: 'smooth' });
             
-            // Очищаем форму если успех
             if (data.success) {
                 form.reset();
             }
@@ -185,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
             responseDiv.style.display = 'block';
         })
         .finally(() => {
-            // Восстанавливаем кнопку
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         });

@@ -6,7 +6,6 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <!-- Хлебные крошки -->
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Главная</a></li>
@@ -14,7 +13,6 @@
                 </ol>
             </nav>
 
-            <!-- Основная карточка -->
             <div class="card border-0 shadow-lg">
                 <div class="card-header bg-primary text-white py-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -28,7 +26,6 @@
                 </div>
                 
                 <div class="card-body p-4">
-                    <!-- Полное изображение -->
                     <div class="text-center mb-5">
                         <div class="image-container mb-3">
                             <img src="/{{ $article['full_image'] }}" 
@@ -43,7 +40,6 @@
                         </div>
                     </div>
 
-                    <!-- Информация о статье -->
                     <div class="row mb-4">
                         <div class="col-md-8">
                             <div class="mb-4">
@@ -87,7 +83,6 @@
                         </div>
                     </div>
 
-                    <!-- Сравнение изображений -->
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <div class="card h-100">
@@ -131,7 +126,6 @@
                         </div>
                     </div>
 
-                    <!-- Краткое описание если есть -->
                     @if(isset($article['shortDesc']))
                     <div class="alert alert-warning mt-4">
                         <h6 class="alert-heading">

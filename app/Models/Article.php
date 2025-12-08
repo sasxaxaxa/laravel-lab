@@ -20,7 +20,6 @@ class Article extends Model
         'is_published',
     ];
 
-    // Кастомные валидационные правила
     public static function rules($id = null)
     {
         return [
