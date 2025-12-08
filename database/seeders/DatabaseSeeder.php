@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Article;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Создаем 50 статей
+        Article::factory()->count(50)->create();
+        
+        // Создаем несколько специфических статей
+        Article::factory()->count(5)->unpublished()->create();
+        Article::factory()->count(10)->category('technology')->create();
+        Article::factory()->count(5)->popular()->create();
+        
+        $this->call([
+            // Здесь можно добавить другие сидеры
+        ]);
     }
 }

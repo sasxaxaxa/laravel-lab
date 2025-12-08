@@ -44,6 +44,11 @@
                             <i class="bi bi-person-plus me-1"></i>Регистрация
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('articles.index') }}">
+                            <i class="bi bi-newspaper me-1"></i>Новости
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
