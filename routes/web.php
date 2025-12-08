@@ -5,6 +5,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ProtectedController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -52,5 +53,16 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
         Route::get('/tokens', [ProtectedController::class, 'tokens'])->name('protected.tokens');
         Route::post('/create-token', [ProtectedController::class, 'createToken'])->name('protected.createToken');
         Route::delete('/revoke-token/{tokenId}', [ProtectedController::class, 'revokeToken'])->name('protected.revokeToken');
+    });
+});
+
+Route::prefix('comments')->group(function () {
+    Route::post('/articles/{article}', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
+    
+    Route::middleware(['auth:sanctum', 'can:manage-comments'])->group(function () {
+        Route::get('/pending', [CommentController::class, 'pending'])->name('comments.pending');
     });
 });

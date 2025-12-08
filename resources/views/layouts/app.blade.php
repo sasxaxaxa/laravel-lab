@@ -54,41 +54,55 @@
                         </a>
                     </li>
                     @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->name }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('protected.dashboard') }}">
-                                        <i class="bi bi-speedometer2 me-2"></i>Панель управления
-                                    </a></li>
-                                <li><a class="dropdown-item" href="{{ route('articles.create') }}">
-                                        <i class="bi bi-plus-circle me-2"></i>Новая статья
-                                    </a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Выйти
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>Вход
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">
-                                <i class="bi bi-person-plus me-1"></i>Регистрация
-                            </a>
-                        </li>
+                        @can('create-article')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('articles.create') }}">
+                                    <i class="bi bi-plus-circle me-1"></i>Создать новость
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('manage-comments')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('comments.pending') }}">
+                                    <i class="bi bi-chat-dots me-1"></i>Модерация
+                                    @php
+                                        $pendingCount = \App\Models\Comment::pending()->count();
+                                    @endphp
+                                    @if($pendingCount > 0)
+                                        <span class="badge bg-danger">{{ $pendingCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-moderator')
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-shield-check me-1"></i>Панель модератора
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('protected.dashboard') }}">
+                                            <i class="bi bi-speedometer2 me-2"></i>Дашборд
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('articles.create') }}">
+                                            <i class="bi bi-file-earmark-plus me-2"></i>Новая статья
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('comments.pending') }}">
+                                            <i class="bi bi-chat-square-text me-2"></i>Модерация комментариев
+                                            @if($pendingCount > 0)
+                                                <span class="badge bg-danger float-end">{{ $pendingCount }}</span>
+                                            @endif
+                                        </a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#">
+                                            <i class="bi bi-people me-2"></i>Пользователи
+                                        </a></li>
+                                </ul>
+                            </li>
+                        @endcan
                     @endauth
                 </ul>
             </div>

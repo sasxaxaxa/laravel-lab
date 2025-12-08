@@ -11,6 +11,12 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function __construct()
+    {
+        $this->authorizeResource(Article::class, 'article');
+    }
+
     public function index()
     {
         $articles = Article::latest()
@@ -24,6 +30,8 @@ class ArticleController extends Controller
      */
     public function create()
     {
+        Gate::authorize('create-article');
+
         $categories = ['politics', 'sports', 'technology', 'entertainment', 'business', 'health'];
         return view('pages.articles.create', compact('categories'));
     }
@@ -37,6 +45,8 @@ class ArticleController extends Controller
             Article::rules(),
             Article::messages()
         );
+
+        $validated['user_id'] = auth()->id();
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
