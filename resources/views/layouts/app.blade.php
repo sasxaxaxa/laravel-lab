@@ -20,6 +20,10 @@
         .nav-link:hover {
             color: #0d6efd !important;
         }
+
+        .user-dropdown-toggle::after {
+            display: none;
+        }
     </style>
 </head>
 
@@ -33,7 +37,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('home') }}">Главная</a>
                     </li>
@@ -42,11 +46,6 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('contacts') }}">Контакты</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('register') }}">
-                            <i class="bi bi-person-plus me-1"></i>Регистрация
-                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('articles.index') }}">
@@ -105,6 +104,55 @@
                         @endcan
                     @endauth
                 </ul>
+
+                <!-- Правая часть навигации - кнопки входа/выхода -->
+                <ul class="navbar-nav ms-auto">
+                    @guest
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Войти
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">
+                                <i class="bi bi-person-plus me-1"></i>Регистрация
+                            </a>
+                        </li>
+                    @endguest
+                    
+                    @auth
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle user-dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>
+                                {{ Auth::user()->name }}
+                                @if(Auth::user()->hasRole('moderator'))
+                                    <span class="badge bg-warning ms-1">Модератор</span>
+                                @endif
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('protected.dashboard') }}">
+                                        <i class="bi bi-speedometer2 me-2"></i>Панель управления
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('protected.tokens') }}">
+                                        <i class="bi bi-key me-2"></i>API Токены
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @endauth
+                </ul>
             </div>
         </div>
     </nav>
@@ -141,6 +189,20 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Подтверждение выхода
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function(e) {
+                    if (!confirm('Вы действительно хотите выйти?')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

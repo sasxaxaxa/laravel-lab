@@ -15,16 +15,30 @@ class ProtectedController extends Controller
         $user = auth()->user();
         $tokens = $user->tokens()->get();
         
-        return view('pages.protected.dashboard', [
+        return view('pages/protected/dashboard', [
             'user' => $user,
             'tokens' => $tokens,
         ]);
     }
 
     /**
-     * Показать информацию о токенах
+     * Показать страницу управления токенами
      */
     public function tokens()
+    {
+        $user = auth()->user();
+        $tokens = $user->tokens()->get();
+        
+        return view('pages.protected.tokens', [
+            'user' => $user,
+            'tokens' => $tokens,
+        ]);
+    }
+
+    /**
+     * API: Получить токены (JSON)
+     */
+    public function getTokens()
     {
         $user = auth()->user();
         $tokens = $user->tokens()->get();
@@ -58,10 +72,18 @@ class ProtectedController extends Controller
 
         $token = $request->user()->createToken($request->token_name);
 
-        return response()->json([
-            'message' => 'Токен успешно создан',
-            'token' => $token->plainTextToken,
-        ]);
+        // Если это AJAX запрос, вернем JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Токен успешно создан',
+                'token' => $token->plainTextToken,
+            ]);
+        }
+
+        // Если обычный POST запрос из формы, вернемся обратно с токеном в сессии
+        return redirect()->route('protected.tokens')
+            ->with('sanctum_token', $token->plainTextToken)
+            ->with('success', 'Токен успешно создан! Сохраните его - он больше не будет показан.');
     }
 
     /**
@@ -71,8 +93,15 @@ class ProtectedController extends Controller
     {
         $request->user()->tokens()->where('id', $tokenId)->delete();
 
-        return response()->json([
-            'message' => 'Токен успешно отозван',
-        ]);
+        // Если это AJAX запрос, вернем JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Токен успешно отозван',
+            ]);
+        }
+
+        // Если обычный запрос из формы, вернемся обратно
+        return redirect()->route('protected.tokens')
+            ->with('success', 'Токен успешно отозван');
     }
 }

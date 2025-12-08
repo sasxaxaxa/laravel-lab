@@ -107,8 +107,10 @@ class AuthController extends Controller
             session()->forget('sanctum_token');
         }
 
+        // Выход из системы
         Auth::logout();
         
+        // Аннулирование сессии
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

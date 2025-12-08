@@ -8,26 +8,20 @@ use App\Http\Controllers\ProtectedController;
 use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 
-
+// Главная и публичные маршруты
 Route::get('/', [MainController::class, 'index'])->name('home');
-
 Route::get('/gallery/{id}', [MainController::class, 'gallery'])->name('gallery');
-
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contacts', [PageController::class, 'contacts'])->name('contacts');
 
+// Статьи (публичная часть)
 Route::prefix('articles')->group(function () {
     Route::get('/', [ArticleController::class, 'index'])->name('articles.index');
     Route::get('/category/{category}', [ArticleController::class, 'category'])->name('articles.category');
     Route::get('/{article}', [ArticleController::class, 'show'])->name('articles.show');
 });
 
-
-Route::prefix('auth')->group(function () {
-    Route::get('/signin', [AuthController::class, 'showRegisterForm'])->name('auth.create');
-    Route::post('/signin', [AuthController::class, 'register'])->name('auth.registration');
-});
-
+// Регистрация и вход (только для гостей)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -36,26 +30,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+// Выход
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
-Route::middleware(['auth:sanctum', 'web'])->group(function () {
-    Route::prefix('articles')->group(function () {
-        Route::get('/create', [ArticleController::class, 'create'])->name('articles.create');
-        Route::post('/', [ArticleController::class, 'store'])->name('articles.store');
-        Route::get('/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
-        Route::put('/{article}', [ArticleController::class, 'update'])->name('articles.update');
-        Route::delete('/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
-    });
-    
-    Route::prefix('protected')->group(function () {
-        Route::get('/dashboard', [ProtectedController::class, 'dashboard'])->name('protected.dashboard');
-        Route::get('/tokens', [ProtectedController::class, 'tokens'])->name('protected.tokens');
-        Route::post('/create-token', [ProtectedController::class, 'createToken'])->name('protected.createToken');
-        Route::delete('/revoke-token/{tokenId}', [ProtectedController::class, 'revokeToken'])->name('protected.revokeToken');
-    });
-});
-
+// Комментарии
 Route::prefix('comments')->group(function () {
     Route::post('/articles/{article}', [CommentController::class, 'store'])->name('comments.store');
     Route::put('/{comment}', [CommentController::class, 'update'])->name('comments.update');
@@ -64,5 +42,25 @@ Route::prefix('comments')->group(function () {
     
     Route::middleware(['auth:sanctum', 'can:manage-comments'])->group(function () {
         Route::get('/pending', [CommentController::class, 'pending'])->name('comments.pending');
+    });
+});
+
+// ЗАЩИЩЕННЫЕ МАРШРУТЫ с auth:sanctum
+Route::middleware(['auth:sanctum', 'web'])->group(function () {
+    // Статьи (защищенные операции)
+    Route::prefix('articles')->group(function () {
+        Route::get('/create', [ArticleController::class, 'create'])->name('articles.create');
+        Route::post('/', [ArticleController::class, 'store'])->name('articles.store');
+        Route::get('/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+        Route::put('/{article}', [ArticleController::class, 'update'])->name('articles.update');
+        Route::delete('/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+    });
+    
+    // Защищенная панель (dashboard)
+    Route::prefix('protected')->group(function () {
+        Route::get('/dashboard', [ProtectedController::class, 'dashboard'])->name('protected.dashboard');
+        Route::get('/tokens', [ProtectedController::class, 'tokens'])->name('protected.tokens');
+        Route::post('/create-token', [ProtectedController::class, 'createToken'])->name('protected.createToken');
+        Route::delete('/revoke-token/{tokenId}', [ProtectedController::class, 'revokeToken'])->name('protected.revokeToken');
     });
 });
