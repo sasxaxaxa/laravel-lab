@@ -9,11 +9,6 @@ class Article extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'title',
         'slug',
@@ -25,35 +20,42 @@ class Article extends Model
         'is_published',
     ];
 
-    /**
-     * Get the route key for the model.
-     */
-    public function getRouteKeyName()
+    // Кастомные валидационные правила
+    public static function rules($id = null)
     {
-        return 'slug';
+        return [
+            'title' => 'required|string|min:5|max:200',
+            'slug' => 'required|string|unique:articles,slug' . ($id ? ",$id" : ''),
+            'content' => 'required|string|min:20',
+            'category' => 'required|string|in:politics,sports,technology,entertainment,business,health',
+            'author' => 'required|string|min:3|max:100',
+            'image' => 'nullable|string',
+            'is_published' => 'boolean',
+        ];
     }
 
-    /**
-     * Scope a query to only include published articles.
-     */
+    public static function messages()
+    {
+        return [
+            'title.required' => 'Заголовок обязателен',
+            'title.min' => 'Заголовок должен быть не менее 5 символов',
+            'slug.required' => 'Slug обязателен',
+            'slug.unique' => 'Такой slug уже существует',
+            'content.required' => 'Содержание обязательно',
+            'content.min' => 'Содержание должно быть не менее 20 символов',
+            'category.required' => 'Категория обязательна',
+            'category.in' => 'Выберите существующую категорию',
+            'author.required' => 'Автор обязателен',
+        ];
+    }
+
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
     }
 
-    /**
-     * Scope a query to only include articles from specific category.
-     */
     public function scopeCategory($query, $category)
     {
         return $query->where('category', $category);
-    }
-
-    /**
-     * Increment article views.
-     */
-    public function incrementViews()
-    {
-        $this->increment('views');
     }
 }

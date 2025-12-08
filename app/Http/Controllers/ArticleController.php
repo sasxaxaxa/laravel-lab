@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
@@ -12,11 +13,40 @@ class ArticleController extends Controller
      */
     public function index()
     {
-        $articles = Article::published()
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $articles = Article::latest()
+            ->paginate(10); // ← Пагинация 10 на странице
             
         return view('pages.articles.index', compact('articles'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $categories = ['politics', 'sports', 'technology', 'entertainment', 'business', 'health'];
+        return view('pages.articles.create', compact('categories'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate(
+            Article::rules(),
+            Article::messages()
+        );
+
+        // Автогенерация slug если не указан
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Str::slug($validated['title']);
+        }
+
+        Article::create($validated);
+
+        return redirect()->route('articles.index')
+            ->with('success', 'Статья успешно создана!');
     }
 
     /**
@@ -24,10 +54,44 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        // Увеличиваем счетчик просмотров
-        $article->incrementViews();
-        
+        $article->increment('views');
         return view('pages.articles.show', compact('article'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Article $article)
+    {
+        $categories = ['politics', 'sports', 'technology', 'entertainment', 'business', 'health'];
+        return view('pages.articles.edit', compact('article', 'categories'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Article $article)
+    {
+        $validated = $request->validate(
+            Article::rules($article->id),
+            Article::messages()
+        );
+
+        $article->update($validated);
+
+        return redirect()->route('articles.index')
+            ->with('success', 'Статья успешно обновлена!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Article $article)
+    {
+        $article->delete();
+
+        return redirect()->route('articles.index')
+            ->with('success', 'Статья успешно удалена!');
     }
 
     /**
@@ -35,9 +99,8 @@ class ArticleController extends Controller
      */
     public function category($category)
     {
-        $articles = Article::published()
-            ->category($category)
-            ->orderBy('created_at', 'desc')
+        $articles = Article::where('category', $category)
+            ->latest()
             ->paginate(10);
             
         return view('pages.articles.category', compact('articles', 'category'));
