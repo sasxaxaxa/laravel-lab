@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
 
 class ProtectedController extends Controller
 {
@@ -12,10 +12,16 @@ class ProtectedController extends Controller
      */
     public function dashboard()
     {
-        $user = auth()->user();
-        $tokens = $user->tokens()->get();
+        // Добавляем проверку аутентификации для безопасности
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Требуется аутентификация');
+        }
         
-        return view('pages/protected/dashboard', [
+        $user = Auth::user();
+        $tokens = $user->tokens()->latest()->get();
+        
+        return view('pages.protected.dashboard', [
             'user' => $user,
             'tokens' => $tokens,
         ]);
@@ -26,8 +32,8 @@ class ProtectedController extends Controller
      */
     public function tokens()
     {
-        $user = auth()->user();
-        $tokens = $user->tokens()->get();
+        $user = Auth::user();
+        $tokens = $user->tokens()->latest()->get();
         
         return view('pages.protected.tokens', [
             'user' => $user,
@@ -40,8 +46,8 @@ class ProtectedController extends Controller
      */
     public function getTokens()
     {
-        $user = auth()->user();
-        $tokens = $user->tokens()->get();
+        $user = Auth::user();
+        $tokens = $user->tokens()->latest()->get();
         
         return response()->json([
             'user' => [
@@ -67,23 +73,28 @@ class ProtectedController extends Controller
     public function createToken(Request $request)
     {
         $request->validate([
-            'token_name' => 'required|string|min:3',
+            'token_name' => 'required|string|min:3|max:50',
         ]);
 
-        $token = $request->user()->createToken($request->token_name);
+        $token = $request->user()->createToken(
+            $request->token_name,
+            ['*'] // все права
+        );
 
-        // Если это AJAX запрос, вернем JSON
-        if ($request->expectsJson()) {
+        // Для AJAX запросов
+        if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'message' => 'Токен успешно создан',
                 'token' => $token->plainTextToken,
+                'token_id' => $token->accessToken->id,
             ]);
         }
 
-        // Если обычный POST запрос из формы, вернемся обратно с токеном в сессии
+        // Для веб-форм
         return redirect()->route('protected.tokens')
             ->with('sanctum_token', $token->plainTextToken)
-            ->with('success', 'Токен успешно создан! Сохраните его - он больше не будет показан.');
+            ->with('success', 'Токен успешно создан! Сохраните его.')
+            ->with('token_id', $token->accessToken->id);
     }
 
     /**
@@ -91,17 +102,16 @@ class ProtectedController extends Controller
      */
     public function revokeToken(Request $request, $tokenId)
     {
-        $request->user()->tokens()->where('id', $tokenId)->delete();
+        $deleted = $request->user()->tokens()->where('id', $tokenId)->delete();
 
-        // Если это AJAX запрос, вернем JSON
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'message' => 'Токен успешно отозван',
+                'message' => $deleted ? 'Токен успешно отозван' : 'Токен не найден',
+                'deleted' => $deleted,
             ]);
         }
 
-        // Если обычный запрос из формы, вернемся обратно
         return redirect()->route('protected.tokens')
-            ->with('success', 'Токен успешно отозван');
+            ->with('success', $deleted ? 'Токен успешно отозван' : 'Токен не найден');
     }
 }
