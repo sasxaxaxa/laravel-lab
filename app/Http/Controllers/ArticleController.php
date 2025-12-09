@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewArticleNotification;
+use App\Models\User;
+
 
 class ArticleController extends Controller
 {
@@ -28,15 +33,12 @@ class ArticleController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    // В конструктор или отдельный метод
     public function create()
     {
-        // Явная проверка через Sanctum
         if (!auth()->check()) {
             abort(403, 'Требуется аутентификация через Sanctum');
         }
 
-        // Дополнительная проверка (если нужно)
         Gate::authorize('create-article');
 
         $categories = ['politics', 'sports', 'technology', 'entertainment', 'business', 'health'];
@@ -48,23 +50,66 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->check()) {
+            abort(403, 'Требуется аутентификация');
+        }
+
         $validated = $request->validate(
             Article::rules(),
             Article::messages()
         );
 
         $validated['user_id'] = auth()->id();
+        
+        if (empty($validated['author'])) {
+            $validated['author'] = auth()->user()->name;
+        }
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
         }
 
-        Article::create($validated);
+        $validated['is_published'] = $request->has('is_published');
 
-        return redirect()->route('articles.index')
-            ->with('success', 'Статья успешно создана!');
+        $article = Article::create($validated);
+
+        try {
+            $moderators = User::where('role', 'moderator')
+                ->orWhere('role', 'admin')
+                ->get();
+
+            if ($moderators->isEmpty()) {
+                $moderatorEmail = config('mail.to_address', config('mail.from.address'));
+                
+                Mail::to($moderatorEmail)->send(
+                    new NewArticleNotification($article, auth()->user())
+                );
+            } else {
+                foreach ($moderators as $moderator) {
+                    Mail::to($moderator->email)->send(
+                        new NewArticleNotification($article, auth()->user(), $moderator)
+                    );
+                }
+            }
+            
+            \Log::info('Email уведомление отправлено модератору о новой статье', [
+                'article_id' => $article->id,
+                'article_title' => $article->title,
+                'author_id' => auth()->id(),
+                'moderators_count' => $moderators->count(),
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Ошибка при отправке email уведомления: ' . $e->getMessage(), [
+                'article_id' => $article->id,
+                'error' => $e->getTraceAsString()
+            ]);
+        }
+
+        return redirect()->route('articles.show', $article)
+            ->with('success', 'Статья успешно создана!' . 
+                   (isset($e) ? ' (Уведомление модератору не отправлено)' : ''));
     }
-
     /**
      * Display the specified resource.
      */

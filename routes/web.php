@@ -18,6 +18,7 @@ Route::get('/contacts', [PageController::class, 'contacts'])->name('contacts');
 Route::prefix('articles')->group(function () {
     Route::get('/', [ArticleController::class, 'index'])->name('articles.index');
     Route::get('/category/{category}', [ArticleController::class, 'category'])->name('articles.category');
+    Route::get('/create', [ArticleController::class, 'create'])->name('articles.create');  // ← ПЕРЕНЕСЕН СЮДА
     Route::get('/{article}', [ArticleController::class, 'show'])->name('articles.show');
 });
 
@@ -37,21 +38,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Комментарии - защищаем Sanctum
 Route::middleware('auth:sanctum')->prefix('comments')->group(function () {
     Route::post('/articles/{article}', [CommentController::class, 'store'])->name('comments.store');
-    Route::put('/{comment}', [CommentController::class, 'update'])->name('comments.update');
-    Route::delete('/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
-    Route::post('/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
     
-    // Отдельная группа с дополнительной проверкой прав
+    // Модерация комментариев (только для модераторов)
     Route::middleware('can:manage-comments')->group(function () {
         Route::get('/pending', [CommentController::class, 'pending'])->name('comments.pending');
+        Route::post('/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
+        Route::post('/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject');
+        Route::put('/{comment}', [CommentController::class, 'update'])->name('comments.update');
+        Route::delete('/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     });
 });
 
 // Все остальные защищенные маршруты под Sanctum
 Route::middleware('auth:sanctum')->group(function () {
     // Статьи (защищенные операции)
-    Route::prefix('articles')->group(function () {
-        Route::get('/create', [ArticleController::class, 'create'])->name('articles.create');
+     Route::prefix('articles')->group(function () {
+        // Route::get('/create', [ArticleController::class, 'create'])->name('articles.create'); // УБРАНО
         Route::post('/', [ArticleController::class, 'store'])->name('articles.store');
         Route::get('/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
         Route::put('/{article}', [ArticleController::class, 'update'])->name('articles.update');
@@ -65,6 +67,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create-token', [ProtectedController::class, 'createToken'])->name('protected.createToken');
         Route::delete('/revoke-token/{tokenId}', [ProtectedController::class, 'revokeToken'])->name('protected.revokeToken');
     });
+
+    Route::get('/comments/pending', [CommentController::class, 'pending'])->name('comments.pending');
 });
 
 

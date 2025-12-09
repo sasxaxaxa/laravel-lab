@@ -14,7 +14,6 @@ class ModeratorSeeder extends Seeder
     $moderatorRole = Role::where('name', 'moderator')->first();
     $readerRole = Role::where('name', 'reader')->first();
 
-    // Используем firstOrCreate для избежания дубликатов
     $moderator = User::firstOrCreate(
         ['email' => 'moderator@example.com'],
         [
@@ -33,7 +32,6 @@ class ModeratorSeeder extends Seeder
         ]
     );
 
-    // Назначить роль читателя пользователям без роли
     $usersWithoutRole = User::whereNull('role_id')->take(3)->get();
     foreach ($usersWithoutRole as $user) {
         $user->update(['role_id' => $readerRole->id]);

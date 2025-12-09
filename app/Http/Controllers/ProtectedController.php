@@ -12,7 +12,6 @@ class ProtectedController extends Controller
      */
     public function dashboard()
     {
-        // Добавляем проверку аутентификации для безопасности
         if (!Auth::check()) {
             return redirect()->route('login')
                 ->with('error', 'Требуется аутентификация');
@@ -78,10 +77,9 @@ class ProtectedController extends Controller
 
         $token = $request->user()->createToken(
             $request->token_name,
-            ['*'] // все права
+            ['*']
         );
 
-        // Для AJAX запросов
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'message' => 'Токен успешно создан',
@@ -90,7 +88,6 @@ class ProtectedController extends Controller
             ]);
         }
 
-        // Для веб-форм
         return redirect()->route('protected.tokens')
             ->with('sanctum_token', $token->plainTextToken)
             ->with('success', 'Токен успешно создан! Сохраните его.')

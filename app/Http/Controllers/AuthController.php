@@ -40,18 +40,14 @@ class AuthController extends Controller
             'password.min' => 'Пароль должен быть не менее 6 символов',
         ]);
 
-        // Создаем пользователя
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // СОЗДАЕМ ТОКЕН SANCTUM при регистрации (но пользователь еще не входит)
         $user->createToken('web-registration-token')->plainTextToken;
 
-        // Согласно заданию: REDIRECT НА ФОРМУ АВТОРИЗАЦИИ
-        // НЕ делаем Auth::login()!
         return redirect()->route('login')
             ->with('success', 'Регистрация прошла успешно! Теперь выполните вход.');
     }
@@ -80,26 +76,18 @@ class AuthController extends Controller
             'password.required' => 'Пароль обязателен',
         ]);
 
-        // Проверяем учетные данные
         if (Auth::attempt($credentials, $request->filled('remember'))) {
-            // Аутентификация прошла успешно
             $request->session()->regenerate();
             
-            // Получаем пользователя
             $user = Auth::user();
             
-            // УДАЛЯЕМ ВСЕ СТАРЫЕ ТОКЕНЫ (по заданию - присвоение нового токена)
             $user->tokens()->delete();
             
-            // СОЗДАЕМ НОВЫЙ ТОКЕН SANCTUM
             $token = $user->createToken('web-session-token')->plainTextToken;
             
-            // Сохраняем токен в сессии (для демонстрации, можно не хранить)
             Session::put('sanctum_token', $token);
             Session::put('sanctum_token_name', 'web-session-token');
             
-            // Согласно заданию: REDIRECT НА ГЛАВНУЮ В ОБХОД ПОСРЕДНИКА AUTH
-            // Используем Sanctum напрямую, не middleware('auth')
             return redirect()->route('home')
                 ->with('success', 'Вы успешно вошли в систему!')
                 ->with('token_info', 'Sanctum токен создан: ' . Str::limit($token, 20));
@@ -117,26 +105,19 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // Проверяем, что пользователь аутентифицирован
         if ($user = $request->user()) {
-            // УДАЛЯЕМ ВСЕ ТОКЕНЫ SANCTUM ЭТОГО ПОЛЬЗОВАТЕЛЯ
             $user->tokens()->delete();
             
-            // Удаляем из сессии
             Session::forget('sanctum_token');
             Session::forget('sanctum_token_name');
         }
         
-        // Выход из системы
         Auth::logout();
         
-        // АННУЛИРОВАНИЕ СЕССИИ
         $request->session()->invalidate();
         
-        // ОБНОВЛЕНИЕ CSRF ТОКЕНА
         $request->session()->regenerateToken();
         
-        // Согласно заданию: REDIRECT НА ГЛАВНУЮ СТРАНИЦУ
         return redirect()->route('home')
             ->with('success', 'Вы успешно вышли из системы. Все токены удалены.');
     }
