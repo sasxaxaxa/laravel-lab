@@ -20,16 +20,23 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::latest()
-            ->paginate(10); 
-            
+            ->paginate(10);
+
         return view('pages.articles.index', compact('articles'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
+    // В конструктор или отдельный метод
     public function create()
     {
+        // Явная проверка через Sanctum
+        if (!auth()->check()) {
+            abort(403, 'Требуется аутентификация через Sanctum');
+        }
+
+        // Дополнительная проверка (если нужно)
         Gate::authorize('create-article');
 
         $categories = ['politics', 'sports', 'technology', 'entertainment', 'business', 'health'];
@@ -111,7 +118,7 @@ class ArticleController extends Controller
         $articles = Article::where('category', $category)
             ->latest()
             ->paginate(10);
-            
+
         return view('pages.articles.category', compact('articles', 'category'));
     }
 }

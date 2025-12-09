@@ -30,23 +30,25 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
-// Выход
+// ВСЕ защищенные маршруты ДОЛЖНЫ быть под auth:sanctum
+// Выход тоже должен быть защищен Sanctum
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Комментарии
-Route::prefix('comments')->group(function () {
+// Комментарии - защищаем Sanctum
+Route::middleware('auth:sanctum')->prefix('comments')->group(function () {
     Route::post('/articles/{article}', [CommentController::class, 'store'])->name('comments.store');
     Route::put('/{comment}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
     
-    Route::middleware(['auth:sanctum', 'can:manage-comments'])->group(function () {
+    // Отдельная группа с дополнительной проверкой прав
+    Route::middleware('can:manage-comments')->group(function () {
         Route::get('/pending', [CommentController::class, 'pending'])->name('comments.pending');
     });
 });
 
-// ЗАЩИЩЕННЫЕ МАРШРУТЫ с auth:sanctum
-Route::middleware(['auth:sanctum', 'web'])->group(function () {
+// Все остальные защищенные маршруты под Sanctum
+Route::middleware('auth:sanctum')->group(function () {
     // Статьи (защищенные операции)
     Route::prefix('articles')->group(function () {
         Route::get('/create', [ArticleController::class, 'create'])->name('articles.create');
@@ -64,3 +66,16 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
         Route::delete('/revoke-token/{tokenId}', [ProtectedController::class, 'revokeToken'])->name('protected.revokeToken');
     });
 });
+
+
+// Временно добавьте в routes/web.php
+Route::get('/debug/sanctum', function(Request $request) {
+    return [
+        'is_authenticated' => auth()->check(),
+        'user_id' => auth()->id(),
+        'user' => auth()->user(),
+        'sanctum_tokens' => auth()->user()?->tokens ?? 'нет пользователя',
+        'session_token' => session('sanctum_token'),
+        'headers' => $request->headers->all(),
+    ];
+})->middleware('auth:sanctum');
