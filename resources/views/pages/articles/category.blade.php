@@ -76,7 +76,6 @@
         <div class="col-12">
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
-                    {{-- Previous Page Link --}}
                     @if ($articles->onFirstPage())
                         <li class="page-item disabled">
                             <span class="page-link">
@@ -91,7 +90,6 @@
                         </li>
                     @endif
 
-                    {{-- Pagination Elements --}}
                     @php
                         $current = $articles->currentPage();
                         $last = $articles->lastPage();
@@ -99,7 +97,6 @@
                         $end = min($last, $current + 2);
                     @endphp
 
-                    {{-- First Page Link --}}
                     @if ($start > 1)
                         <li class="page-item">
                             <a class="page-link" href="{{ $articles->url(1) }}">1</a>
@@ -111,7 +108,6 @@
                         @endif
                     @endif
 
-                    {{-- Page Number Links --}}
                     @for ($i = $start; $i <= $end; $i++)
                         <li class="page-item {{ $i == $current ? 'active' : '' }}">
                             @if ($i == $current)
@@ -122,7 +118,7 @@
                         </li>
                     @endfor
 
-                    {{-- Last Page Link --}}
+                    
                     @if ($end < $last)
                         @if ($end < $last - 1)
                             <li class="page-item disabled">
@@ -134,7 +130,7 @@
                         </li>
                     @endif
 
-                    {{-- Next Page Link --}}
+                    
                     @if ($articles->hasMorePages())
                         <li class="page-item">
                             <a class="page-link" href="{{ $articles->nextPageUrl() }}">

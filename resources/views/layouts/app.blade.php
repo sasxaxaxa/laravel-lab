@@ -31,7 +31,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
             <a class="navbar-brand text-primary" href="{{ route('home') }}">
-                <i class="bi bi-house-door me-2"></i>МойСайт
+                <i class="bi bi-house-door me-2"></i>News
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -105,7 +105,6 @@
                     @endauth
                 </ul>
 
-                <!-- Правая часть навигации - кнопки входа/выхода -->
                 <ul class="navbar-nav ms-auto">
                     @guest
                         <li class="nav-item">

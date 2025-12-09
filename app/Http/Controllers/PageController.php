@@ -21,9 +21,9 @@ class PageController extends Controller
         $contacts = [
             [
                 'title' => 'Адрес',
-                'value' => 'г. Москва, ул. Примерная, д. 123',
+                'value' => 'г. Москва, ул. Пряшникова, д. 2а',
                 'icon' => 'bi-geo-alt',
-                'description' => 'Ближайшее метро: "Технологический институт"'
+                'description' => 'Ближайшее метро: "Коптево"'
             ],
             [
                 'title' => 'Телефон',
@@ -33,13 +33,13 @@ class PageController extends Controller
             ],
             [
                 'title' => 'Email',
-                'value' => 'info@mysite.ru',
+                'value' => 'news@gmail.com',
                 'icon' => 'bi-envelope',
                 'description' => 'Ответим в течение 24 часов'
             ],
             [
                 'title' => 'Техническая поддержка',
-                'value' => 'support@mysite.ru',
+                'value' => 'support-news@gmail.com',
                 'icon' => 'bi-headset',
                 'description' => 'Круглосуточно'
             ],
@@ -51,7 +51,7 @@ class PageController extends Controller
             ],
             [
                 'title' => 'Социальные сети',
-                'value' => '@mysite_official',
+                'value' => '@news_official',
                 'icon' => 'bi-telegram',
                 'description' => 'Telegram канал'
             ],
