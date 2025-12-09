@@ -9,29 +9,34 @@ use Illuminate\Support\Facades\Hash;
 
 class ModeratorSeeder extends Seeder
 {
-    public function run(): void
-    {
-        $moderatorRole = Role::where('name', 'moderator')->first();
+   public function run(): void
+{
+    $moderatorRole = Role::where('name', 'moderator')->first();
+    $readerRole = Role::where('name', 'reader')->first();
 
-        $moderator = User::create([
+    // Используем firstOrCreate для избежания дубликатов
+    $moderator = User::firstOrCreate(
+        ['email' => 'moderator@example.com'],
+        [
             'name' => 'Администратор Модератор',
-            'email' => 'moderator@example.com',
             'password' => Hash::make('moderator123'),
             'role_id' => $moderatorRole->id,
-        ]);
+        ]
+    );
 
-        $readerRole = Role::where('name', 'reader')->first();
-        
-        User::create([
+    $reader = User::firstOrCreate(
+        ['email' => 'reader@example.com'],
+        [
             'name' => 'Обычный Читатель',
-            'email' => 'reader@example.com',
             'password' => Hash::make('reader123'),
             'role_id' => $readerRole->id,
-        ]);
+        ]
+    );
 
-        $users = User::whereNull('role_id')->take(3)->get();
-        foreach ($users as $user) {
-            $user->update(['role_id' => $readerRole->id]);
-        }
+    // Назначить роль читателя пользователям без роли
+    $usersWithoutRole = User::whereNull('role_id')->take(3)->get();
+    foreach ($usersWithoutRole as $user) {
+        $user->update(['role_id' => $readerRole->id]);
     }
+}
 }

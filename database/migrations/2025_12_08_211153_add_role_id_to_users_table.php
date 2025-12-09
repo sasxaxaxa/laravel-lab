@@ -7,11 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable()->constrained()->onDelete('set null');
-        });
-    }
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->foreignId('role_id')
+              ->nullable()
+              ->constrained('roles')
+              ->onDelete('set null');
+    });
+}
 
     public function down(): void
     {

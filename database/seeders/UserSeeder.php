@@ -16,13 +16,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password123'),
         ]);
 
-        User::create([
-            'name' => 'Модератор',
-            'email' => 'moderator@example.com',
-            'password' => Hash::make('password123'),
-            'role_id' => 'moderator',
-        ]);
-
         User::factory()->count(5)->create();
     }
 }
