@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NewArticleNotification;
 use App\Models\User;
-
+use App\Jobs\VeryLongJob;
 
 class ArticleController extends Controller
 {
@@ -50,66 +50,43 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        if (!auth()->check()) {
-            abort(403, 'Требуется аутентификация');
-        }
-
-        $validated = $request->validate(
-            Article::rules(),
-            Article::messages()
-        );
-
+        // Валидация данных
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            // Если есть поле author в форме, добавьте:
+            // 'author' => 'required|string|max:255',
+        ]);
+        
+        // Используем auth() хелпер
         $validated['user_id'] = auth()->id();
         
-        if (empty($validated['author'])) {
-            $validated['author'] = auth()->user()->name;
+        // Добавляем поле author (ВАЖНО!)
+        $validated['author'] = auth()->user()->name ?? 'Admin';
+        
+        // Создаем уникальный slug из заголовка
+        $slug = Str::slug($validated['title']);
+        $count = Article::where('slug', 'LIKE', $slug . '%')->count();
+        
+        if ($count > 0) {
+            $slug = $slug . '-' . ($count + 1);
         }
-
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
-        }
-
-        $validated['is_published'] = $request->has('is_published');
-
+        
+        $validated['slug'] = $slug;
+        
+        // Создание статьи
         $article = Article::create($validated);
-
-        try {
-            $moderators = User::where('role', 'moderator')
-                ->orWhere('role', 'admin')
-                ->get();
-
-            if ($moderators->isEmpty()) {
-                $moderatorEmail = config('mail.to_address', config('mail.from.address'));
-                
-                Mail::to($moderatorEmail)->send(
-                    new NewArticleNotification($article, auth()->user())
-                );
-            } else {
-                foreach ($moderators as $moderator) {
-                    Mail::to($moderator->email)->send(
-                        new NewArticleNotification($article, auth()->user(), $moderator)
-                    );
-                }
-            }
-            
-            \Log::info('Email уведомление отправлено модератору о новой статье', [
-                'article_id' => $article->id,
-                'article_title' => $article->title,
-                'author_id' => auth()->id(),
-                'moderators_count' => $moderators->count(),
-            ]);
-            
-        } catch (\Exception $e) {
-            \Log::error('Ошибка при отправке email уведомления: ' . $e->getMessage(), [
-                'article_id' => $article->id,
-                'error' => $e->getTraceAsString()
-            ]);
-        }
-
-        return redirect()->route('articles.show', $article)
-            ->with('success', 'Статья успешно создана!' . 
-                   (isset($e) ? ' (Уведомление модератору не отправлено)' : ''));
+        
+        // Логируем создание статьи
+        info('Article created: ' . $article->id . '. Dispatching VeryLongJob to queue.');
+        
+        // Помещаем задание в очередь
+        VeryLongJob::dispatch($article);
+        
+        return redirect()->route('articles.index')
+            ->with('success', 'Article created successfully! Notifications are being sent in the background.');
     }
+
     /**
      * Display the specified resource.
      */
