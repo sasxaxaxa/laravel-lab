@@ -49,44 +49,50 @@ class ArticleController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        // Валидация данных
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            // Если есть поле author в форме, добавьте:
-            // 'author' => 'required|string|max:255',
-        ]);
-        
-        // Используем auth() хелпер
-        $validated['user_id'] = auth()->id();
-        
-        // Добавляем поле author (ВАЖНО!)
-        $validated['author'] = auth()->user()->name ?? 'Admin';
-        
-        // Создаем уникальный slug из заголовка
-        $slug = Str::slug($validated['title']);
-        $count = Article::where('slug', 'LIKE', $slug . '%')->count();
-        
-        if ($count > 0) {
-            $slug = $slug . '-' . ($count + 1);
-        }
-        
-        $validated['slug'] = $slug;
-        
-        // Создание статьи
-        $article = Article::create($validated);
-        
-        // Логируем создание статьи
-        info('Article created: ' . $article->id . '. Dispatching VeryLongJob to queue.');
-        
-        // Помещаем задание в очередь
-        VeryLongJob::dispatch($article);
-        
-        return redirect()->route('articles.index')
-            ->with('success', 'Article created successfully! Notifications are being sent in the background.');
+{
+    // Валидация данных
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'content' => 'required|string',
+        'image' => 'nullable|string', // Изменено: строка вместо файла
+    ]);
+    
+    // Используем auth() хелпер
+    $validated['user_id'] = auth()->id();
+    
+    // Добавляем поле author
+    $validated['author'] = auth()->user()->name ?? 'Admin';
+    
+    // Обработка изображения (просто сохраняем выбранный путь)
+    if ($request->has('image') && $request->image) {
+        $validated['image'] = $request->image;
+        info('Image selected: ' . $validated['image']);
+    } else {
+        $validated['image'] = null; // или значение по умолчанию
     }
-
+    
+    // Создаем уникальный slug из заголовка
+    $slug = Str::slug($validated['title']);
+    $count = Article::where('slug', 'LIKE', $slug . '%')->count();
+    
+    if ($count > 0) {
+        $slug = $slug . '-' . ($count + 1);
+    }
+    
+    $validated['slug'] = $slug;
+    
+    // Создание статьи
+    $article = Article::create($validated);
+    
+    // Логируем создание статьи
+    info('Article created: ' . $article->id . '. Dispatching VeryLongJob to queue.');
+    
+    // Помещаем задание в очередь
+    VeryLongJob::dispatch($article);
+    
+    return redirect()->route('articles.index')
+        ->with('success', 'Article created successfully! Notifications are being sent in the background.');
+}
     /**
      * Display the specified resource.
      */
@@ -109,18 +115,23 @@ class ArticleController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Article $article)
-    {
-        $validated = $request->validate(
-            Article::rules($article->id),
-            Article::messages()
-        );
-
-        $article->update($validated);
-
-        return redirect()->route('articles.index')
-            ->with('success', 'Статья успешно обновлена!');
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'content' => 'required|string',
+        'image' => 'nullable|string', // Изменено: строка вместо файла
+    ]);
+    
+    // Обработка изображения
+    if ($request->has('image')) {
+        $validated['image'] = $request->image;
     }
+    
+    $article->update($validated);
 
+    return redirect()->route('articles.index')
+        ->with('success', 'Статья успешно обновлена!');
+}
     /**
      * Remove the specified resource from storage.
      */
