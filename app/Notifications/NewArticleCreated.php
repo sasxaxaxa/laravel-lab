@@ -16,10 +16,23 @@ class NewArticleCreated extends Notification implements ShouldQueue
     protected $article;
     protected $author;
 
-    public function __construct(Article $article, User $author)
+    public function __construct(Article $article, ?User $author = null)
     {
         $this->article = $article;
         $this->author = $author;
+        
+        // Если автор не передан, пытаемся получить его из статьи
+        if (!$this->author && $article->user) {
+            $this->author = $article->user;
+        }
+        
+        // Если все еще нет автора, создаем заглушку
+        if (!$this->author) {
+            $this->author = new User([
+                'id' => 0,
+                'name' => 'Неизвестный автор',
+            ]);
+        }
     }
 
     public function via(object $notifiable): array

@@ -18,6 +18,11 @@ class Article extends Model
         'image',
         'views',
         'is_published',
+        'user_id',
+    ];
+
+    protected $attributes = [
+        'user_id' => 1, // Значение по умолчанию
     ];
 
     public static function rules($id = null)
