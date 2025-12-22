@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ProtectedController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // Главная и публичные маршруты
@@ -68,8 +69,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/revoke-token/{tokenId}', [ProtectedController::class, 'revokeToken'])->name('protected.revokeToken');
     });
 
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+        Route::delete('/', [NotificationController::class, 'destroyAll'])->name('notifications.destroyAll');
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
+        Route::get('/unread-list', [NotificationController::class, 'unreadList'])->name('notifications.unreadList');
+    });
+
+
     Route::get('/comments/pending', [CommentController::class, 'pending'])->name('comments.pending');
 });
+
+
 
 
 // Временно добавьте в routes/web.php
@@ -83,3 +97,5 @@ Route::get('/debug/sanctum', function(Request $request) {
         'headers' => $request->headers->all(),
     ];
 })->middleware('auth:sanctum');
+
+

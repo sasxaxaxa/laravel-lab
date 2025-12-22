@@ -25,13 +25,44 @@
         .user-dropdown-toggle::after {
             display: none;
         }
+
+        /* Стили для уведомлений */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
+        }
+        
+        .notification-dropdown {
+            min-width: 300px;
+        }
+        
+        .notification-item {
+            white-space: normal;
+        }
+        
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .notification-time {
+            font-size: 0.8rem;
+        }
+        
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            display: inline-block;
+            margin-right: 5px;
+        }
     </style>
 </head>
 
 <body>
-    <div id="app">
-        
-</div>
+    <div id="app"></div>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
             <a class="navbar-brand text-primary" href="{{ route('home') }}">
@@ -110,22 +141,87 @@
                 </ul>
 
                 <ul class="navbar-nav ms-auto">
-                    @guest
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>Войти
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">
-                                <i class="bi bi-person-plus me-1"></i>Регистрация
-                            </a>
-                        </li>
-                    @endguest
-                    
                     @auth
+                        <!-- Уведомления -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle user-dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link position-relative" href="#" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell fs-5"></i>
+                                @php
+                                    $unreadCount = auth()->user()->unreadNotifications->count();
+                                @endphp
+                                @if($unreadCount > 0)
+                                    <span class="badge bg-danger notification-badge">
+                                        {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                    </span>
+                                @endif
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                                <li class="dropdown-header px-3 pt-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>Уведомления</strong>
+                                        @if($unreadCount > 0)
+                                            <a href="{{ route('notifications.markAllAsRead') }}" 
+                                               class="btn btn-sm btn-outline-success"
+                                               onclick="return confirm('Отметить все как прочитанные?')">
+                                                Отметить все
+                                            </a>
+                                        @endif
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                @if($unreadCount > 0)
+                                    @foreach(auth()->user()->unreadNotifications->take(5) as $notification)
+                                        <li>
+                                            <a class="dropdown-item notification-item p-3" 
+                                               href="{{ route('notifications.read', $notification->id) }}">
+                                                <div class="d-flex">
+                                                    <div class="me-2">
+                                                        <span class="notification-dot"></span>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold mb-1">
+                                                            {{ $notification->data['article_title'] ?? 'Новая статья' }}
+                                                        </div>
+                                                        <div class="text-muted small mb-1">
+                                                            {{ $notification->data['message'] ?? 'Новое уведомление' }}
+                                                        </div>
+                                                        <div class="text-muted notification-time">
+                                                            <i class="bi bi-clock me-1"></i>
+                                                            {{ $notification->created_at->diffForHumans() }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        @if(!$loop->last)
+                                            <li><hr class="dropdown-divider m-0"></li>
+                                        @endif
+                                    @endforeach
+                                @else
+                                    <li class="px-3 py-3 text-center text-muted">
+                                        <i class="bi bi-bell-slash fs-4 mb-2 d-block"></i>
+                                        Нет новых уведомлений
+                                    </li>
+                                @endif
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <div class="d-grid px-3 pb-2">
+                                        <a href="{{ route('notifications.index') }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-list me-1"></i>Все уведомления
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Профиль пользователя -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle user-dropdown-toggle" href="#" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>
                                 {{ Auth::user()->name }}
                                 @if(Auth::user()->hasRole('moderator'))
@@ -143,6 +239,14 @@
                                         <i class="bi bi-key me-2"></i>API Токены
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('notifications.index') }}">
+                                        <i class="bi bi-bell me-2"></i>Уведомления
+                                        @if($unreadCount > 0)
+                                            <span class="badge bg-danger float-end">{{ $unreadCount }}</span>
+                                        @endif
+                                    </a>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}" id="logout-form">
@@ -155,6 +259,19 @@
                             </ul>
                         </li>
                     @endauth
+                    
+                    @guest
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Войти
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">
+                                <i class="bi bi-person-plus me-1"></i>Регистрация
+                            </a>
+                        </li>
+                    @endguest
                 </ul>
             </div>
         </div>
@@ -203,8 +320,36 @@
                     }
                 });
             }
+            
+            // Автообновление счетчика уведомлений (опционально)
+            function updateNotificationCount() {
+                fetch('{{ route("notifications.unreadCount") }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.querySelector('.notification-badge');
+                        if (data.count > 0) {
+                            if (!badge) {
+                                // Создать бейдж если его нет
+                                const bellIcon = document.querySelector('.nav-link[data-bs-toggle="dropdown"] i.bi-bell');
+                                if (bellIcon) {
+                                    const newBadge = document.createElement('span');
+                                    newBadge.className = 'badge bg-danger notification-badge';
+                                    newBadge.textContent = data.count > 9 ? '9+' : data.count;
+                                    bellIcon.parentNode.appendChild(newBadge);
+                                }
+                            } else {
+                                badge.textContent = data.count > 9 ? '9+' : data.count;
+                            }
+                        } else if (badge) {
+                            badge.remove();
+                        }
+                    })
+                    .catch(error => console.error('Error updating notification count:', error));
+            }
+            
+            // Обновлять каждые 30 секунд
+            setInterval(updateNotificationCount, 30000);
         });
     </script>
 </body>
-
 </html>
