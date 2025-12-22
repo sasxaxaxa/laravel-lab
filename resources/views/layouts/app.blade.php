@@ -2,6 +2,7 @@
 <html lang="ru">
 
 <head>
+    @vite(entrypoints: ['resources/css/app.css', 'resources/js/app.js'])
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Мой сайт')</title>
@@ -28,6 +29,9 @@
 </head>
 
 <body>
+    <div id="app">
+        
+</div>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
             <a class="navbar-brand text-primary" href="{{ route('home') }}">

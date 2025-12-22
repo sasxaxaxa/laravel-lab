@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewArticleEvent;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -83,7 +84,8 @@ class ArticleController extends Controller
     
     // Создание статьи
     $article = Article::create($validated);
-    
+    broadcast(new NewArticleEvent($article))->toOthers();
+
     // Логируем создание статьи
     info('Article created: ' . $article->id . '. Dispatching VeryLongJob to queue.');
     
